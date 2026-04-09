@@ -1,0 +1,152 @@
+/* custom.css — Minimal custom styles beyond Tailwind CDN */
+
+/* ===== Custom Scrollbar for Kanban Board ===== */
+.kanban-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.kanban-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 3px;
+}
+
+.kanban-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(156, 163, 175, 0.5);
+    border-radius: 3px;
+}
+
+.kanban-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(107, 114, 128, 0.7);
+}
+
+.kanban-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+/* ===== Flash Message Animations ===== */
+@keyframes flash-slide-in {
+    0% {
+        opacity: 0;
+        transform: translateY(-1rem);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes flash-fade-out {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-1rem);
+    }
+}
+
+.flash-message {
+    animation: flash-slide-in 0.3s ease-out forwards;
+}
+
+.flash-message.removing {
+    animation: flash-fade-out 0.3s ease-in forwards;
+}
+
+/* ===== Kanban Column Drop Target ===== */
+.kanban-column-drop-active {
+    outline: 2px dashed rgba(99, 102, 241, 0.6);
+    outline-offset: -2px;
+    background-color: rgba(99, 102, 241, 0.05);
+}
+
+/* ===== Drag Ghost ===== */
+.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+}
+
+/* ===== Smooth Transitions for Interactive Elements ===== */
+.transition-smooth {
+    transition: all 0.2s ease-in-out;
+}
+
+/* ===== Truncate Multi-line Text ===== */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* ===== Sidebar Active Link Indicator ===== */
+.sidebar-link-active {
+    position: relative;
+}
+
+.sidebar-link-active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background-color: #6366f1;
+    border-radius: 0 2px 2px 0;
+}
+
+/* ===== Loading Spinner ===== */
+@keyframes spin-slow {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin-slow {
+    animation: spin-slow 1.5s linear infinite;
+}
+
+/* ===== Priority Badge Pulse ===== */
+@keyframes priority-pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+.priority-critical {
+    animation: priority-pulse 2s ease-in-out infinite;
+}
+
+/* ===== Modal Backdrop ===== */
+.modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+}
+
+/* ===== Focus Ring Utility ===== */
+.focus-ring:focus {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+}
+
+/* ===== Textarea Auto-resize Helper ===== */
+.textarea-autosize {
+    resize: vertical;
+    min-height: 5rem;
+}

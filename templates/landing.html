@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}ProjectForge — Project Management Platform{% endblock %}
+
+{% block content %}
+<div class="relative overflow-hidden">
+    <div class="py-12 sm:py-20 lg:py-28 text-center">
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-gray-900">
+            Plan. Track. <span class="text-primary-600">Deliver.</span>
+        </h1>
+        <p class="mt-6 max-w-2xl mx-auto text-lg sm:text-xl text-gray-600 leading-relaxed">
+            ProjectForge is a comprehensive project management platform built for teams to plan sprints, track tickets, and deliver projects efficiently.
+        </p>
+        <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+            {% if current_user %}
+                <a href="/dashboard" class="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                    <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0h4" />
+                    </svg>
+                    Go to Dashboard
+                </a>
+            {% else %}
+                <a href="/auth/register" class="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                    Get Started Free
+                </a>
+                <a href="/auth/login" class="inline-flex items-center px-8 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 shadow-sm">
+                    Sign In
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="py-12 sm:py-16">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl sm:text-4xl font-bold text-gray-900">Everything your team needs</h2>
+            <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">Powerful features to help you manage projects from start to finish.</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200">
+                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-primary-100 text-primary-600 mb-4">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900">Project Management</h3>
+                <p class="mt-2 text-gray-600 text-sm leading-relaxed">Create, organize, and track projects with detailed metadata, team assignments, and real-time status updates.</p>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200">
+                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-accent-100 text-accent-600 mb-4">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900">Sprint Tracking</h3>
+                <p class="mt-2 text-gray-600 text-sm leading-relaxed">Plan and manage time-boxed sprints with velocity tracking, burndown metrics, and backlog management.</p>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200">
+                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-purple-100 text-purple-600 mb-4">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900">Kanban Boards</h3>
+                <p class="mt-2 text-gray-600 text-sm leading-relaxed">Visualize workflow with interactive drag-and-drop Kanban boards. Filter by sprint, assignee, and priority.</p>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200">
+                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-red-100 text-red-600 mb-4">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900">Role-Based Access Control</h3>
+                <p class="mt-2 text-gray-600 text-sm leading-relaxed">Granular permissions with five distinct roles — Super Admin, Project Manager, Team Lead, Developer, and Viewer.</p>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200">
+                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-yellow-100 text-yellow-600 mb-4">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900">Audit Logging</h3>
+                <p class="mt-2 text-gray-600 text-sm leading-relaxed">Comprehensive audit trail for every create, update, and delete operation with detailed change tracking.</p>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200">
+                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-indigo-100 text-indigo-600 mb-4">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900">Analytics Dashboard</h3>
+                <p class="mt-2 text-gray-600 text-sm leading-relaxed">Project-level analytics with ticket distribution, sprint velocity charts, team workload, and time tracking summaries.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="py-12 sm:py-16">
+        <div class="bg-primary-700 rounded-2xl shadow-xl px-6 py-12 sm:px-12 sm:py-16 text-center">
+            <h2 class="text-2xl sm:text-3xl font-bold text-white">Ready to streamline your workflow?</h2>
+            <p class="mt-4 max-w-xl mx-auto text-primary-100 text-lg">Join teams that use ProjectForge to ship projects on time, every time.</p>
+            <div class="mt-8">
+                {% if current_user %}
+                    <a href="/dashboard" class="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-primary-700 bg-white hover:bg-primary-50 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-primary-700 focus:ring-white shadow-sm">
+                        Go to Dashboard
+                    </a>
+                {% else %}
+                    <a href="/auth/register" class="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-primary-700 bg-white hover:bg-primary-50 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-primary-700 focus:ring-white shadow-sm">
+                        Get Started — It's Free
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

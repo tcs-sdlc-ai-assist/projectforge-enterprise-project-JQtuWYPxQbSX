@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+
+{% block title %}{% if ticket %}Edit Ticket — {{ ticket.title }}{% else %}Create Ticket{% endif %} — ProjectForge{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <div class="mb-6">
+        <nav class="flex items-center space-x-2 text-sm text-gray-500">
+            <a href="/dashboard" class="hover:text-primary-600 transition-colors duration-150">Dashboard</a>
+            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            </svg>
+            <a href="/tickets" class="hover:text-primary-600 transition-colors duration-150">Tickets</a>
+            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            </svg>
+            <span class="text-gray-700 font-medium">{% if ticket %}Edit Ticket{% else %}Create Ticket{% endif %}</span>
+        </nav>
+    </div>
+
+    <div class="bg-white shadow-sm rounded-lg border border-gray-200">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h1 class="text-xl font-semibold text-gray-900">
+                {% if ticket %}
+                    Edit Ticket
+                {% else %}
+                    Create New Ticket
+                {% endif %}
+            </h1>
+            <p class="mt-1 text-sm text-gray-500">
+                {% if ticket %}
+                    Update the ticket details below.
+                {% else %}
+                    Fill in the details to create a new ticket.
+                {% endif %}
+            </p>
+        </div>
+
+        <form method="POST" action="{% if ticket %}/tickets/{{ ticket.id }}/edit{% else %}/tickets/create{% endif %}" class="px-6 py-6 space-y-6">
+            <!-- Title -->
+            <div>
+                <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Title <span class="text-red-500">*</span></label>
+                <input type="text" name="title" id="title" required
+                    value="{{ ticket.title if ticket else '' }}"
+                    placeholder="Enter a descriptive ticket title"
+                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">
+            </div>
+
+            <!-- Description -->
+            <div>
+                <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea name="description" id="description" rows="5"
+                    placeholder="Provide a detailed description of the ticket"
+                    class="textarea-autosize block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">{{ ticket.description if ticket and ticket.description else '' }}</textarea>
+                <p class="mt-1 text-xs text-gray-400">Markdown formatting is supported.</p>
+            </div>
+
+            <!-- Type and Priority (side by side) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Type -->
+                <div>
+                    <label for="type" class="block text-sm font-medium text-gray-700 mb-1">Type <span class="text-red-500">*</span></label>
+                    <select name="type" id="type" required
+                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">
+                        <option value="">Select type</option>
+                        {% for type_option in ticket_types %}
+                            <option value="{{ type_option }}" {% if ticket and ticket.type == type_option %}selected{% endif %}>
+                                {{ type_option | replace('_', ' ') | title }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Priority -->
+                <div>
+                    <label for="priority" class="block text-sm font-medium text-gray-700 mb-1">Priority <span class="text-red-500">*</span></label>
+                    <select name="priority" id="priority" required
+                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">
+                        <option value="">Select priority</option>
+                        {% for priority_option in priorities %}
+                            <option value="{{ priority_option }}" {% if ticket and ticket.priority == priority_option %}selected{% endif %}>
+                                {{ priority_option | replace('_', ' ') | title }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Status and Project (side by side) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Status -->
+                <div>
+                    <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status <span class="text-red-500">*</span></label>
+                    <select name="status" id="status" required
+                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">
+                        {% for status_option in statuses %}
+                            <option value="{{ status_option }}" {% if ticket and ticket.status == status_option %}selected{% elif not ticket and status_option == 'open' %}selected{% endif %}>
+                                {{ status_option | replace('_', ' ') | title }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Project -->
+                <div>
+                    <label for="project_id" class="block text-sm font-medium text-gray-700 mb-1">Project <span class="text-red-500">*</span></label>
+                    <select name="project_id" id="project_id" required
+                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">
+                        <option value="">Select project</option>
+                        {% for project in projects %}
+                            <option value="{{ project.id }}" {% if ticket and ticket.project_id == project.id %}selected{% elif selected_project_id and selected_project_id == project.id %}selected{% endif %}>
+                                {{ project.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Assignee and Reporter (side by side) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Assignee -->
+                <div>
+                    <label for="assignee_id" class="block text-sm font-medium text-gray-700 mb-1">Assignee</label>
+                    <select name="assignee_id" id="assignee_id"
+                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">
+                        <option value="">Unassigned</option>
+                        {% for user in users %}
+                            <option value="{{ user.id }}" {% if ticket and ticket.assignee_id == user.id %}selected{% endif %}>
+                                {{ user.username }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Reporter -->
+                <div>
+                    <label for="reporter_id" class="block text-sm font-medium text-gray-700 mb-1">Reporter</label>
+                    <select name="reporter_id" id="reporter_id"
+                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">
+                        <option value="">Select reporter</option>
+                        {% for user in users %}
+                            <option value="{{ user.id }}" {% if ticket and ticket.reporter_id == user.id %}selected{% elif not ticket and current_user and current_user.id == user.id %}selected{% endif %}>
+                                {{ user.username }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Sprint and Parent Ticket (side by side) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Sprint -->
+                <div>
+                    <label for="sprint_id" class="block text-sm font-medium text-gray-700 mb-1">Sprint</label>
+                    <select name="sprint_id" id="sprint_id"
+                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">
+                        <option value="">No sprint (Backlog)</option>
+                        {% for sprint in sprints %}
+                            <option value="{{ sprint.id }}" {% if ticket and ticket.sprint_id == sprint.id %}selected{% endif %}>
+                                {{ sprint.name }} {% if sprint.status %}({{ sprint.status | replace('_', ' ') | title }}){% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Parent Ticket -->
+                <div>
+                    <label for="parent_id" class="block text-sm font-medium text-gray-700 mb-1">Parent Ticket</label>
+                    <select name="parent_id" id="parent_id"
+                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">
+                        <option value="">None (top-level ticket)</option>
+                        {% for parent_ticket in parent_tickets %}
+                            {% if not ticket or parent_ticket.id != ticket.id %}
+                                <option value="{{ parent_ticket.id }}" {% if ticket and ticket.parent_id == parent_ticket.id %}selected{% endif %}>
+                                    {{ parent_ticket.title }}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Labels (multi-select) -->
+            <div>
+                <label for="label_ids" class="block text-sm font-medium text-gray-700 mb-1">Labels</label>
+                <select name="label_ids" id="label_ids" multiple
+                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border"
+                    style="min-height: 5rem;">
+                    {% for label in labels %}
+                        <option value="{{ label.id }}"
+                            {% if ticket and ticket_label_ids and label.id in ticket_label_ids %}selected{% endif %}
+                            style="{% if label.color %}border-left: 4px solid {{ label.color }}; padding-left: 8px;{% endif %}">
+                            {{ label.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <p class="mt-1 text-xs text-gray-400">Hold Ctrl (Cmd on Mac) to select multiple labels.</p>
+            </div>
+
+            <!-- Estimated Hours -->
+            <div class="max-w-xs">
+                <label for="estimated_hours" class="block text-sm font-medium text-gray-700 mb-1">Estimated Hours</label>
+                <div class="relative">
+                    <input type="number" name="estimated_hours" id="estimated_hours"
+                        value="{{ ticket.estimated_hours if ticket and ticket.estimated_hours else '' }}"
+                        min="0" step="0.5"
+                        placeholder="0.0"
+                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border pr-12">
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <span class="text-gray-400 text-sm">hrs</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200">
+                <a href="{% if ticket %}/tickets/{{ ticket.id }}{% else %}/tickets{% endif %}"
+                    class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-150">
+                    Cancel
+                </a>
+                <button type="submit"
+                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-150">
+                    {% if ticket %}
+                        <svg class="h-4 w-4 mr-1.5 -ml-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Update Ticket
+                    {% else %}
+                        <svg class="h-4 w-4 mr-1.5 -ml-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Create Ticket
+                    {% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var projectSelect = document.getElementById('project_id');
+        var sprintSelect = document.getElementById('sprint_id');
+        var parentSelect = document.getElementById('parent_id');
+
+        if (projectSelect) {
+            projectSelect.addEventListener('change', function () {
+                var selectedProjectId = this.value;
+                if (!selectedProjectId) return;
+
+                // Update sprint options based on project
+                if (sprintSelect && typeof sprintsByProject !== 'undefined') {
+                    var currentSprintValue = sprintSelect.value;
+                    var options = '<option value="">No sprint (Backlog)</option>';
+                    var projectSprints = sprintsByProject[selectedProjectId] || [];
+                    projectSprints.forEach(function (sprint) {
+                        var selected = sprint.id == currentSprintValue ? ' selected' : '';
+                        var statusLabel = sprint.status ? ' (' + sprint.status.replace('_', ' ').replace(/\b\w/g, function(l){ return l.toUpperCase(); }) + ')' : '';
+                        options += '<option value="' + sprint.id + '"' + selected + '>' + sprint.name + statusLabel + '</option>';
+                    });
+                    sprintSelect.innerHTML = options;
+                }
+
+                // Update parent ticket options based on project
+                if (parentSelect && typeof ticketsByProject !== 'undefined') {
+                    var currentParentValue = parentSelect.value;
+                    var ticketId = '{{ ticket.id if ticket else "" }}';
+                    var parentOptions = '<option value="">None (top-level ticket)</option>';
+                    var projectTickets = ticketsByProject[selectedProjectId] || [];
+                    projectTickets.forEach(function (t) {
+                        if (t.id != ticketId) {
+                            var selected = t.id == currentParentValue ? ' selected' : '';
+                            parentOptions += '<option value="' + t.id + '"' + selected + '>' + t.title + '</option>';
+                        }
+                    });
+                    parentSelect.innerHTML = parentOptions;
+                }
+            });
+        }
+
+        // Add visual indicator for selected labels
+        var labelSelect = document.getElementById('label_ids');
+        if (labelSelect) {
+            labelSelect.addEventListener('change', function () {
+                var count = this.selectedOptions.length;
+                var label = this.previousElementSibling;
+                if (label && count > 0) {
+                    var badge = label.querySelector('.label-count');
+                    if (!badge) {
+                        badge = document.createElement('span');
+                        badge.className = 'label-count ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800';
+                        label.appendChild(badge);
+                    }
+                    badge.textContent = count + ' selected';
+                } else if (label) {
+                    var existingBadge = label.querySelector('.label-count');
+                    if (existingBadge) existingBadge.remove();
+                }
+            });
+            // Trigger on load to show initial count
+            labelSelect.dispatchEvent(new Event('change'));
+        }
+    });
+</script>
+{% endblock %}

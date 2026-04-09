@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+
+{% block title %}Tickets — ProjectForge{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="sm:flex sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Tickets</h1>
+            <p class="mt-1 text-sm text-gray-500">Browse and filter all tickets{% if project %} for {{ project.name }}{% endif %}</p>
+        </div>
+        {% if current_user and current_user.role in ['super_admin', 'project_manager', 'team_lead', 'developer'] %}
+        <div class="mt-4 sm:mt-0">
+            <a href="/tickets/create{% if project %}?project_id={{ project.id }}{% endif %}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-150">
+                <svg class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                New Ticket
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="bg-white shadow rounded-lg p-4">
+        <form method="GET" action="/tickets" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {% if project %}
+            <input type="hidden" name="project_id" value="{{ project.id }}">
+            {% endif %}
+
+            <div>
+                <label for="filter-status" class="block text-xs font-medium text-gray-700 mb-1">Status</label>
+                <select id="filter-status" name="status" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm py-2 px-3 border">
+                    <option value="">All Statuses</option>
+                    {% for s in ['open', 'in_progress', 'in_review', 'done', 'closed'] %}
+                    <option value="{{ s }}" {% if filters is defined and filters and filters.status == s %}selected{% endif %}>{{ s | replace('_', ' ') | title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="filter-type" class="block text-xs font-medium text-gray-700 mb-1">Type</label>
+                <select id="filter-type" name="type" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm py-2 px-3 border">
+                    <option value="">All Types</option>
+                    {% for t in ['bug', 'feature', 'task', 'improvement', 'epic'] %}
+                    <option value="{{ t }}" {% if filters is defined and filters and filters.type == t %}selected{% endif %}>{{ t | title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="filter-priority" class="block text-xs font-medium text-gray-700 mb-1">Priority</label>
+                <select id="filter-priority" name="priority" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm py-2 px-3 border">
+                    <option value="">All Priorities</option>
+                    {% for p in ['critical', 'high', 'medium', 'low'] %}
+                    <option value="{{ p }}" {% if filters is defined and filters and filters.priority == p %}selected{% endif %}>{{ p | title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="filter-assignee" class="block text-xs font-medium text-gray-700 mb-1">Assignee</label>
+                <select id="filter-assignee" name="assignee_id" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm py-2 px-3 border">
+                    <option value="">All Assignees</option>
+                    {% if assignees is defined and assignees %}
+                    {% for user in assignees %}
+                    <option value="{{ user.id }}" {% if filters is defined and filters and filters.assignee_id | string == user.id | string %}selected{% endif %}>{{ user.username }}</option>
+                    {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+
+            <div>
+                <label for="filter-sprint" class="block text-xs font-medium text-gray-700 mb-1">Sprint</label>
+                <select id="filter-sprint" name="sprint_id" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm py-2 px-3 border">
+                    <option value="">All Sprints</option>
+                    {% if sprints is defined and sprints %}
+                    {% for sprint in sprints %}
+                    <option value="{{ sprint.id }}" {% if filters is defined and filters and filters.sprint_id | string == sprint.id | string %}selected{% endif %}>{{ sprint.name }}</option>
+                    {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+
+            <div class="flex items-end gap-2">
+                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-150">
+                    <svg class="-ml-1 mr-1.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                    </svg>
+                    Filter
+                </button>
+                <a href="/tickets{% if project %}?project_id={{ project.id }}{% endif %}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-150">
+                    Clear
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+        {% if tickets and tickets | length > 0 %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Key</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assignee</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Labels</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for ticket in tickets %}
+                    <tr class="hover:bg-gray-50 transition-colors duration-100 cursor-pointer" onclick="window.location='/tickets/{{ ticket.id }}'">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-sm font-mono font-medium text-primary-600">{{ ticket.key if ticket.key is defined and ticket.key else 'T-' ~ ticket.id }}</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm font-medium text-gray-900 line-clamp-2">
+                                <a href="/tickets/{{ ticket.id }}" class="hover:text-primary-600 transition-colors duration-150">{{ ticket.title }}</a>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% set ticket_type = ticket.type if ticket.type is defined and ticket.type else 'task' %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if ticket_type == 'bug' %}
+                                    bg-red-100 text-red-800
+                                {% elif ticket_type == 'feature' %}
+                                    bg-purple-100 text-purple-800
+                                {% elif ticket_type == 'task' %}
+                                    bg-blue-100 text-blue-800
+                                {% elif ticket_type == 'improvement' %}
+                                    bg-teal-100 text-teal-800
+                                {% elif ticket_type == 'epic' %}
+                                    bg-indigo-100 text-indigo-800
+                                {% else %}
+                                    bg-gray-100 text-gray-800
+                                {% endif %}
+                            ">
+                                {% if ticket_type == 'bug' %}
+                                <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.56 1.14a.75.75 0 01.177 1.045 3.989 3.989 0 00-.464.86c.185.17.382.329.59.473A3.993 3.993 0 0110 2c1.272 0 2.405.594 3.137 1.518.208-.144.405-.303.59-.473a3.989 3.989 0 00-.464-.86.75.75 0 011.222-.869c.369.519.65 1.105.822 1.736a.75.75 0 01-.174.707 7.03 7.03 0 01-1.299 1.098A4 4 0 0114 6c0 .52-.1 1.017-.281 1.473.744.453 1.381 1.041 1.879 1.716a.75.75 0 01-.238 1.034.75.75 0 01-1.034-.238 5.484 5.484 0 00-1.258-1.195A3.98 3.98 0 0110 10a3.98 3.98 0 01-3.068-1.21 5.484 5.484 0 00-1.258 1.195.75.75 0 11-1.272-.796c.498-.675 1.135-1.263 1.879-1.716A3.98 3.98 0 016 6a4 4 0 01.166-1.143 7.032 7.032 0 01-1.3-1.098.75.75 0 01-.173-.707 5.483 5.483 0 01.822-1.736.75.75 0 011.046-.177z" clip-rule="evenodd" /></svg>
+                                {% elif ticket_type == 'feature' %}
+                                <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zm7-10a1 1 0 01.967.744L14.146 7.2 17.5 7.512a1 1 0 01.541 1.753l-2.454 2.029.715 3.293a1 1 0 01-1.49 1.085L12 13.514l-2.812 2.158a1 1 0 01-1.49-1.085l.715-3.293-2.454-2.029a1 1 0 01.541-1.753L9.854 7.2l1.179-3.456A1 1 0 0112 3z" clip-rule="evenodd" /></svg>
+                                {% elif ticket_type == 'epic' %}
+                                <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" /></svg>
+                                {% endif %}
+                                {{ ticket_type | title }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% set ticket_status = ticket.status if ticket.status is defined and ticket.status else 'open' %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if ticket_status == 'open' %}
+                                    bg-blue-100 text-blue-800
+                                {% elif ticket_status == 'in_progress' %}
+                                    bg-yellow-100 text-yellow-800
+                                {% elif ticket_status == 'in_review' %}
+                                    bg-purple-100 text-purple-800
+                                {% elif ticket_status == 'done' %}
+                                    bg-green-100 text-green-800
+                                {% elif ticket_status == 'closed' %}
+                                    bg-gray-100 text-gray-800
+                                {% else %}
+                                    bg-gray-100 text-gray-800
+                                {% endif %}
+                            ">
+                                {% if ticket_status == 'in_progress' %}
+                                <svg class="mr-1 h-3 w-3 animate-spin-slow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                                {% elif ticket_status == 'done' %}
+                                <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                                {% endif %}
+                                {{ ticket_status | replace('_', ' ') | title }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% set ticket_priority = ticket.priority if ticket.priority is defined and ticket.priority else 'medium' %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if ticket_priority == 'critical' %}
+                                    bg-red-100 text-red-800 priority-critical
+                                {% elif ticket_priority == 'high' %}
+                                    bg-orange-100 text-orange-800
+                                {% elif ticket_priority == 'medium' %}
+                                    bg-yellow-100 text-yellow-800
+                                {% elif ticket_priority == 'low' %}
+                                    bg-green-100 text-green-800
+                                {% else %}
+                                    bg-gray-100 text-gray-800
+                                {% endif %}
+                            ">
+                                {% if ticket_priority == 'critical' %}
+                                <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clip-rule="evenodd" /></svg>
+                                {% elif ticket_priority == 'high' %}
+                                <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
+                                {% elif ticket_priority == 'low' %}
+                                <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                                {% endif %}
+                                {{ ticket_priority | title }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if ticket.assignee is defined and ticket.assignee %}
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-7 w-7 rounded-full bg-primary-100 flex items-center justify-center">
+                                    <span class="text-xs font-medium text-primary-700">{{ ticket.assignee.username[:2] | upper }}</span>
+                                </div>
+                                <span class="ml-2 text-sm text-gray-900">{{ ticket.assignee.username }}</span>
+                            </div>
+                            {% else %}
+                            <span class="text-sm text-gray-400 italic">Unassigned</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-wrap gap-1">
+                                {% if ticket.labels is defined and ticket.labels %}
+                                {% for label in ticket.labels %}
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" style="background-color: {{ label.color if label.color is defined and label.color else '#e5e7eb' }}20; color: {{ label.color if label.color is defined and label.color else '#6b7280' }};">
+                                    <span class="mr-1 h-2 w-2 rounded-full inline-block" style="background-color: {{ label.color if label.color is defined and label.color else '#6b7280' }};"></span>
+                                    {{ label.name }}
+                                </span>
+                                {% endfor %}
+                                {% else %}
+                                <span class="text-xs text-gray-400">—</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if pagination is defined and pagination %}
+        <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+            <div class="flex-1 flex justify-between sm:hidden">
+                {% if pagination.has_prev %}
+                <a href="?page={{ pagination.page - 1 }}{% if filters is defined and filters %}{% if filters.status %}&status={{ filters.status }}{% endif %}{% if filters.type %}&type={{ filters.type }}{% endif %}{% if filters.priority %}&priority={{ filters.priority }}{% endif %}{% if filters.assignee_id %}&assignee_id={{ filters.assignee_id }}{% endif %}{% if filters.sprint_id %}&sprint_id={{ filters.sprint_id }}{% endif %}{% endif %}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Previous</a>
+                {% endif %}
+                {% if pagination.has_next %}
+                <a href="?page={{ pagination.page + 1 }}{% if filters is defined and filters %}{% if filters.status %}&status={{ filters.status }}{% endif %}{% if filters.type %}&type={{ filters.type }}{% endif %}{% if filters.priority %}&priority={{ filters.priority }}{% endif %}{% if filters.assignee_id %}&assignee_id={{ filters.assignee_id }}{% endif %}{% if filters.sprint_id %}&sprint_id={{ filters.sprint_id }}{% endif %}{% endif %}" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Next</a>
+                {% endif %}
+            </div>
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-sm text-gray-700">
+                        Showing <span class="font-medium">{{ pagination.offset + 1 }}</span> to <span class="font-medium">{{ [pagination.offset + pagination.per_page, pagination.total] | min }}</span> of <span class="font-medium">{{ pagination.total }}</span> results
+                    </p>
+                </div>
+                <div>
+                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                        {% if pagination.has_prev %}
+                        <a href="?page={{ pagination.page - 1 }}{% if filters is defined and filters %}{% if filters.status %}&status={{ filters.status }}{% endif %}{% if filters.type %}&type={{ filters.type }}{% endif %}{% if filters.priority %}&priority={{ filters.priority }}{% endif %}{% if filters.assignee_id %}&assignee_id={{ filters.assignee_id }}{% endif %}{% if filters.sprint_id %}&sprint_id={{ filters.sprint_id }}{% endif %}{% endif %}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                            <span class="sr-only">Previous</span>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                        </a>
+                        {% endif %}
+                        {% if pagination.has_next %}
+                        <a href="?page={{ pagination.page + 1 }}{% if filters is defined and filters %}{% if filters.status %}&status={{ filters.status }}{% endif %}{% if filters.type %}&type={{ filters.type }}{% endif %}{% if filters.priority %}&priority={{ filters.priority }}{% endif %}{% if filters.assignee_id %}&assignee_id={{ filters.assignee_id }}{% endif %}{% if filters.sprint_id %}&sprint_id={{ filters.sprint_id }}{% endif %}{% endif %}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                            <span class="sr-only">Next</span>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
+                        </a>
+                        {% endif %}
+                    </nav>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No tickets found</h3>
+            <p class="mt-1 text-sm text-gray-500">
+                {% if filters is defined and filters and (filters.status or filters.type or filters.priority or filters.assignee_id or filters.sprint_id) %}
+                    Try adjusting your filters to find what you're looking for.
+                {% else %}
+                    Get started by creating a new ticket.
+                {% endif %}
+            </p>
+            {% if current_user and current_user.role in ['super_admin', 'project_manager', 'team_lead', 'developer'] %}
+            <div class="mt-6">
+                <a href="/tickets/create{% if project %}?project_id={{ project.id }}{% endif %}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-150">
+                    <svg class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    New Ticket
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}User Management — ProjectForge{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="sm:flex sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">User Management</h1>
+            <p class="mt-1 text-sm text-gray-500">Manage all users, roles, departments, and account status.</p>
+        </div>
+        <div class="mt-4 sm:mt-0">
+            <button type="button" id="toggle-create-form" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-150">
+                <svg class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Add User
+            </button>
+        </div>
+    </div>
+
+    <div id="create-user-form" class="hidden bg-white shadow rounded-lg p-6 border border-gray-200">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Create New User</h2>
+        <form method="POST" action="/admin/users/create" class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                    <label for="new_username" class="block text-sm font-medium text-gray-700">Username</label>
+                    <input type="text" name="username" id="new_username" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border" placeholder="johndoe">
+                </div>
+                <div>
+                    <label for="new_email" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" name="email" id="new_email" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border" placeholder="john@example.com">
+                </div>
+                <div>
+                    <label for="new_password" class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" name="password" id="new_password" required minlength="6" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border" placeholder="••••••••">
+                </div>
+                <div>
+                    <label for="new_role" class="block text-sm font-medium text-gray-700">Role</label>
+                    <select name="role" id="new_role" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">
+                        <option value="viewer">Viewer</option>
+                        <option value="developer" selected>Developer</option>
+                        <option value="team_lead">Team Lead</option>
+                        <option value="project_manager">Project Manager</option>
+                        <option value="super_admin">Super Admin</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="new_department" class="block text-sm font-medium text-gray-700">Department</label>
+                    <select name="department_id" id="new_department" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">
+                        <option value="">— None —</option>
+                        {% for department in departments %}
+                            <option value="{{ department.id }}">{{ department.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3 pt-2">
+                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-accent-600 hover:bg-accent-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-500 transition-colors duration-150">
+                    Create User
+                </button>
+                <button type="button" id="cancel-create-form" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-150">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="bg-white shadow rounded-lg border border-gray-200">
+        <div class="px-4 py-4 sm:px-6 border-b border-gray-200">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <h2 class="text-lg font-medium text-gray-900">All Users</h2>
+                <form method="GET" action="/admin/users" class="flex items-center gap-2">
+                    <input type="text" name="search" value="{{ search or '' }}" placeholder="Search users…" class="block w-full sm:w-64 rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">
+                    <button type="submit" class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-150">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% if users %}
+                        {% for user in users %}
+                        <tr class="hover:bg-gray-50 transition-colors duration-100">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
+                                        <span class="text-primary-700 font-medium text-sm">{{ user.username[:2] | upper }}</span>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-900">{{ user.username }}</p>
+                                        <p class="text-xs text-gray-500">ID: {{ user.id }}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                {{ user.email or '—' }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <form method="POST" action="/admin/users/{{ user.id }}/role" class="inline-flex items-center gap-2">
+                                    <select name="role" onchange="this.form.submit()" class="block rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 text-xs px-2 py-1 border
+                                        {% if user.role == 'super_admin' %}
+                                            bg-red-50 text-red-800
+                                        {% elif user.role == 'project_manager' %}
+                                            bg-blue-50 text-blue-800
+                                        {% elif user.role == 'team_lead' %}
+                                            bg-purple-50 text-purple-800
+                                        {% elif user.role == 'developer' %}
+                                            bg-green-50 text-green-800
+                                        {% elif user.role == 'qa_tester' %}
+                                            bg-yellow-50 text-yellow-800
+                                        {% else %}
+                                            bg-gray-50 text-gray-800
+                                        {% endif %}
+                                    ">
+                                        <option value="viewer" {% if user.role == 'viewer' %}selected{% endif %}>Viewer</option>
+                                        <option value="developer" {% if user.role == 'developer' %}selected{% endif %}>Developer</option>
+                                        <option value="team_lead" {% if user.role == 'team_lead' %}selected{% endif %}>Team Lead</option>
+                                        <option value="project_manager" {% if user.role == 'project_manager' %}selected{% endif %}>Project Manager</option>
+                                        <option value="super_admin" {% if user.role == 'super_admin' %}selected{% endif %}>Super Admin</option>
+                                    </select>
+                                </form>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <form method="POST" action="/admin/users/{{ user.id }}/department" class="inline-flex items-center gap-2">
+                                    <select name="department_id" onchange="this.form.submit()" class="block rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 text-xs px-2 py-1 border bg-white">
+                                        <option value="" {% if not user.department_id %}selected{% endif %}>— None —</option>
+                                        {% for department in departments %}
+                                            <option value="{{ department.id }}" {% if user.department_id == department.id %}selected{% endif %}>{{ department.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </form>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <form method="POST" action="/admin/users/{{ user.id }}/toggle-active" class="inline">
+                                    <button type="submit" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2
+                                        {% if user.is_active %}
+                                            bg-green-100 text-green-800 hover:bg-green-200 focus:ring-green-500
+                                        {% else %}
+                                            bg-red-100 text-red-800 hover:bg-red-200 focus:ring-red-500
+                                        {% endif %}
+                                    " title="Click to {{ 'deactivate' if user.is_active else 'activate' }}">
+                                        {% if user.is_active %}
+                                            <svg class="mr-1 h-3 w-3 text-green-500" fill="currentColor" viewBox="0 0 8 8">
+                                                <circle cx="4" cy="4" r="3" />
+                                            </svg>
+                                            Active
+                                        {% else %}
+                                            <svg class="mr-1 h-3 w-3 text-red-500" fill="currentColor" viewBox="0 0 8 8">
+                                                <circle cx="4" cy="4" r="3" />
+                                            </svg>
+                                            Inactive
+                                        {% endif %}
+                                    </button>
+                                </form>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                                <a href="/admin/users/{{ user.id }}" class="text-primary-600 hover:text-primary-800 font-medium transition-colors duration-150">View</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="px-6 py-12 text-center">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                <h3 class="mt-2 text-sm font-medium text-gray-900">No users found</h3>
+                                <p class="mt-1 text-sm text-gray-500">
+                                    {% if search %}
+                                        No users match your search "{{ search }}". Try a different query.
+                                    {% else %}
+                                        Get started by creating a new user.
+                                    {% endif %}
+                                </p>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if users %}
+        <div class="bg-gray-50 px-4 py-3 border-t border-gray-200 sm:px-6">
+            <div class="flex items-center justify-between">
+                <p class="text-sm text-gray-700">
+                    Showing <span class="font-medium">{{ users | length }}</span> user{{ 's' if users | length != 1 else '' }}
+                </p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var toggleBtn = document.getElementById('toggle-create-form');
+        var cancelBtn = document.getElementById('cancel-create-form');
+        var createForm = document.getElementById('create-user-form');
+
+        if (toggleBtn && createForm) {
+            toggleBtn.addEventListener('click', function () {
+                createForm.classList.toggle('hidden');
+                if (!createForm.classList.contains('hidden')) {
+                    var firstInput = createForm.querySelector('input');
+                    if (firstInput) firstInput.focus();
+                }
+            });
+        }
+
+        if (cancelBtn && createForm) {
+            cancelBtn.addEventListener('click', function () {
+                createForm.classList.add('hidden');
+            });
+        }
+    });
+</script>
+{% endblock %}

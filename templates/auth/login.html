@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Login — ProjectForge{% endblock %}
+
+{% block content %}
+<div class="min-h-[70vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="w-full max-w-md space-y-8">
+        <div class="text-center">
+            <svg class="mx-auto h-12 w-12 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+            <h2 class="mt-4 text-3xl font-bold tracking-tight text-gray-900">Sign in to ProjectForge</h2>
+            <p class="mt-2 text-sm text-gray-600">
+                Or
+                <a href="/auth/register" class="font-medium text-primary-600 hover:text-primary-500 transition-colors duration-150">create a new account</a>
+            </p>
+        </div>
+
+        {% if error %}
+        <div class="rounded-md bg-red-50 border border-red-200 p-4" role="alert">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <p class="ml-3 text-sm font-medium text-red-800">{{ error }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <form class="mt-8 space-y-6" method="POST" action="/auth/login">
+            <div class="space-y-4 rounded-md">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                    <input id="username" name="username" type="text" autocomplete="username" required
+                        class="block w-full rounded-md border border-gray-300 px-3 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 sm:text-sm transition-colors duration-150"
+                        placeholder="Enter your username"
+                        value="{{ username | default('', true) }}">
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input id="password" name="password" type="password" autocomplete="current-password" required
+                        class="block w-full rounded-md border border-gray-300 px-3 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 sm:text-sm transition-colors duration-150"
+                        placeholder="Enter your password">
+                </div>
+            </div>
+
+            <div>
+                <button type="submit"
+                    class="group relative flex w-full justify-center rounded-md bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors duration-150">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                        <svg class="h-5 w-5 text-primary-400 group-hover:text-primary-300 transition-colors duration-150" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                        </svg>
+                    </span>
+                    Sign in
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

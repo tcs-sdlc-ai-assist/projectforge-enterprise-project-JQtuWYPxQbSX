@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}{% if sprint %}Edit Sprint — ProjectForge{% else %}New Sprint — ProjectForge{% endif %}{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <nav class="flex" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+            <li class="inline-flex items-center">
+                <a href="/dashboard" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-primary-600 transition-colors duration-150">
+                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                    </svg>
+                    Dashboard
+                </a>
+            </li>
+            <li>
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    <a href="/sprints" class="ml-1 text-sm font-medium text-gray-500 hover:text-primary-600 md:ml-2 transition-colors duration-150">Sprints</a>
+                </div>
+            </li>
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="ml-1 text-sm font-medium text-gray-700 md:ml-2">{% if sprint %}Edit Sprint{% else %}New Sprint{% endif %}</span>
+                </div>
+            </li>
+        </ol>
+    </nav>
+</div>
+
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white shadow-sm rounded-lg border border-gray-200">
+        <div class="px-6 py-5 border-b border-gray-200">
+            <h1 class="text-2xl font-bold text-gray-900">
+                {% if sprint %}Edit Sprint{% else %}Create New Sprint{% endif %}
+            </h1>
+            <p class="mt-1 text-sm text-gray-500">
+                {% if sprint %}Update the sprint details below.{% else %}Fill in the details to create a new sprint.{% endif %}
+            </p>
+        </div>
+
+        <form method="POST" action="{% if sprint %}/sprints/{{ sprint.id }}/edit{% else %}/sprints/create{% endif %}" class="px-6 py-6 space-y-6">
+            {% if errors %}
+                <div class="rounded-md bg-red-50 border border-red-200 p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-red-800">Please correct the following errors:</h3>
+                            <ul class="mt-2 text-sm text-red-700 list-disc list-inside space-y-1">
+                                {% for error in errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Sprint Name <span class="text-red-500">*</span></label>
+                <input type="text" name="name" id="name"
+                    value="{{ sprint.name if sprint else (form_data.name if form_data else '') }}"
+                    required
+                    placeholder="e.g., Sprint 1 — User Authentication"
+                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-4 py-2.5 border transition-colors duration-150">
+                <p class="mt-1 text-xs text-gray-500">A descriptive name for this sprint.</p>
+            </div>
+
+            <div>
+                <label for="goal" class="block text-sm font-medium text-gray-700 mb-1">Sprint Goal</label>
+                <textarea name="goal" id="goal" rows="4"
+                    placeholder="Describe the objective of this sprint..."
+                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-4 py-2.5 border textarea-autosize transition-colors duration-150">{{ sprint.goal if sprint else (form_data.goal if form_data else '') }}</textarea>
+                <p class="mt-1 text-xs text-gray-500">A brief summary of what this sprint aims to achieve.</p>
+            </div>
+
+            {% if projects %}
+            <div>
+                <label for="project_id" class="block text-sm font-medium text-gray-700 mb-1">Project <span class="text-red-500">*</span></label>
+                <select name="project_id" id="project_id" required
+                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-4 py-2.5 border transition-colors duration-150">
+                    <option value="">Select a project</option>
+                    {% for project in projects %}
+                        <option value="{{ project.id }}"
+                            {% if (sprint and sprint.project_id == project.id) or (form_data and form_data.project_id | string == project.id | string) %}selected{% endif %}>
+                            {{ project.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <p class="mt-1 text-xs text-gray-500">The project this sprint belongs to.</p>
+            </div>
+            {% endif %}
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                    <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Start Date <span class="text-red-500">*</span></label>
+                    <input type="date" name="start_date" id="start_date"
+                        value="{{ sprint.start_date if sprint else (form_data.start_date if form_data else '') }}"
+                        required
+                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-4 py-2.5 border transition-colors duration-150">
+                </div>
+
+                <div>
+                    <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">End Date <span class="text-red-500">*</span></label>
+                    <input type="date" name="end_date" id="end_date"
+                        value="{{ sprint.end_date if sprint else (form_data.end_date if form_data else '') }}"
+                        required
+                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-4 py-2.5 border transition-colors duration-150">
+                </div>
+            </div>
+
+            {% if sprint %}
+            <div>
+                <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <select name="status" id="status"
+                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-4 py-2.5 border transition-colors duration-150">
+                    <option value="planning" {% if sprint.status == 'planning' %}selected{% endif %}>Planning</option>
+                    <option value="active" {% if sprint.status == 'active' %}selected{% endif %}>Active</option>
+                    <option value="completed" {% if sprint.status == 'completed' %}selected{% endif %}>Completed</option>
+                </select>
+                <p class="mt-1 text-xs text-gray-500">Current status of the sprint.</p>
+            </div>
+            {% endif %}
+
+            <div class="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200">
+                <a href="/sprints" class="inline-flex items-center px-4 py-2.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-150">
+                    Cancel
+                </a>
+                <button type="submit" class="inline-flex items-center px-6 py-2.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-150">
+                    <svg class="w-4 h-4 mr-2 -ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        {% if sprint %}
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        {% else %}
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                        {% endif %}
+                    </svg>
+                    {% if sprint %}Update Sprint{% else %}Create Sprint{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var startDateInput = document.getElementById('start_date');
+        var endDateInput = document.getElementById('end_date');
+
+        if (startDateInput && endDateInput) {
+            startDateInput.addEventListener('change', function () {
+                if (startDateInput.value) {
+                    endDateInput.min = startDateInput.value;
+                    if (endDateInput.value && endDateInput.value < startDateInput.value) {
+                        endDateInput.value = '';
+                    }
+                }
+            });
+
+            endDateInput.addEventListener('change', function () {
+                if (endDateInput.value) {
+                    startDateInput.max = endDateInput.value;
+                }
+            });
+
+            if (startDateInput.value) {
+                endDateInput.min = startDateInput.value;
+            }
+            if (endDateInput.value) {
+                startDateInput.max = endDateInput.value;
+            }
+        }
+    });
+</script>
+{% endblock %}

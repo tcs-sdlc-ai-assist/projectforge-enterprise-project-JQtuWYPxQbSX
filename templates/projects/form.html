@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block title %}{% if project %}Edit Project — ProjectForge{% else %}New Project — ProjectForge{% endif %}{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <nav class="flex" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+            <li class="inline-flex items-center">
+                <a href="/dashboard" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-primary-600 transition-colors duration-150">
+                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                    </svg>
+                    Dashboard
+                </a>
+            </li>
+            <li>
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    <a href="/projects" class="ml-1 text-sm font-medium text-gray-500 hover:text-primary-600 md:ml-2 transition-colors duration-150">Projects</a>
+                </div>
+            </li>
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="ml-1 text-sm font-medium text-gray-700 md:ml-2">{% if project %}Edit Project{% else %}New Project{% endif %}</span>
+                </div>
+            </li>
+        </ol>
+    </nav>
+</div>
+
+<div class="max-w-3xl mx-auto">
+    <div class="bg-white shadow-sm rounded-lg border border-gray-200">
+        <div class="px-6 py-5 border-b border-gray-200">
+            <h1 class="text-2xl font-bold text-gray-900">
+                {% if project %}
+                    Edit Project
+                {% else %}
+                    Create New Project
+                {% endif %}
+            </h1>
+            <p class="mt-1 text-sm text-gray-500">
+                {% if project %}
+                    Update the project details below.
+                {% else %}
+                    Fill in the details below to create a new project.
+                {% endif %}
+            </p>
+        </div>
+
+        <form method="POST" action="{% if project %}/projects/{{ project.id }}/edit{% else %}/projects/create{% endif %}" class="px-6 py-6 space-y-6">
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
+                    Project Name <span class="text-red-500">*</span>
+                </label>
+                <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value="{{ project.name if project else '' }}"
+                    required
+                    maxlength="200"
+                    placeholder="Enter project name"
+                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border transition-colors duration-150 focus-ring"
+                />
+                <p class="mt-1 text-xs text-gray-400">A unique, descriptive name for the project.</p>
+            </div>
+
+            <div>
+                <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
+                    Description
+                </label>
+                <textarea
+                    id="description"
+                    name="description"
+                    rows="4"
+                    placeholder="Describe the project goals, scope, and key deliverables..."
+                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border textarea-autosize transition-colors duration-150 focus-ring"
+                >{{ project.description if project and project.description else '' }}</textarea>
+                <p class="mt-1 text-xs text-gray-400">Optional. Provide context about the project for team members.</p>
+            </div>
+
+            <div>
+                <label for="status" class="block text-sm font-medium text-gray-700 mb-1">
+                    Status <span class="text-red-500">*</span>
+                </label>
+                <select
+                    id="status"
+                    name="status"
+                    required
+                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border transition-colors duration-150 focus-ring"
+                >
+                    <option value="planning" {% if project and project.status == 'planning' %}selected{% endif %}>Planning</option>
+                    <option value="active" {% if project and project.status == 'active' %}selected{% endif %}>Active</option>
+                    <option value="on_hold" {% if project and project.status == 'on_hold' %}selected{% endif %}>On Hold</option>
+                    <option value="completed" {% if project and project.status == 'completed' %}selected{% endif %}>Completed</option>
+                    <option value="archived" {% if project and project.status == 'archived' %}selected{% endif %}>Archived</option>
+                </select>
+                <p class="mt-1 text-xs text-gray-400">Current lifecycle stage of the project.</p>
+            </div>
+
+            <div>
+                <label for="owner_id" class="block text-sm font-medium text-gray-700 mb-1">
+                    Project Owner
+                </label>
+                <select
+                    id="owner_id"
+                    name="owner_id"
+                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border transition-colors duration-150 focus-ring"
+                >
+                    <option value="">— No owner assigned —</option>
+                    {% if users %}
+                        {% for user in users %}
+                            <option value="{{ user.id }}" {% if project and project.owner_id is defined and project.owner_id == user.id %}selected{% endif %}>
+                                {{ user.username }}{% if user.role %} ({{ user.role | replace('_', ' ') | title }}){% endif %}
+                            </option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
+                <p class="mt-1 text-xs text-gray-400">The person responsible for overseeing this project.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                    <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">
+                        Start Date
+                    </label>
+                    <input
+                        type="date"
+                        id="start_date"
+                        name="start_date"
+                        value="{{ project.start_date.strftime('%Y-%m-%d') if project and project.start_date else '' }}"
+                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border transition-colors duration-150 focus-ring"
+                    />
+                </div>
+                <div>
+                    <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">
+                        End Date
+                    </label>
+                    <input
+                        type="date"
+                        id="end_date"
+                        name="end_date"
+                        value="{{ project.end_date.strftime('%Y-%m-%d') if project and project.end_date else '' }}"
+                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border transition-colors duration-150 focus-ring"
+                    />
+                </div>
+            </div>
+
+            {% if error %}
+                <div class="rounded-md bg-red-50 border border-red-200 p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-red-800">{{ error }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200">
+                <a
+                    href="{% if project %}/projects/{{ project.id }}{% else %}/projects{% endif %}"
+                    class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-150"
+                >
+                    Cancel
+                </a>
+                <button
+                    type="submit"
+                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-150"
+                >
+                    {% if project %}
+                        <svg class="w-4 h-4 mr-2 -ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Update Project
+                    {% else %}
+                        <svg class="w-4 h-4 mr-2 -ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Create Project
+                    {% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var startDateInput = document.getElementById('start_date');
+        var endDateInput = document.getElementById('end_date');
+
+        if (startDateInput && endDateInput) {
+            startDateInput.addEventListener('change', function () {
+                if (startDateInput.value) {
+                    endDateInput.setAttribute('min', startDateInput.value);
+                    if (endDateInput.value && endDateInput.value < startDateInput.value) {
+                        endDateInput.value = startDateInput.value;
+                    }
+                } else {
+                    endDateInput.removeAttribute('min');
+                }
+            });
+
+            endDateInput.addEventListener('change', function () {
+                if (endDateInput.value) {
+                    startDateInput.setAttribute('max', endDateInput.value);
+                    if (startDateInput.value && startDateInput.value > endDateInput.value) {
+                        startDateInput.value = endDateInput.value;
+                    }
+                } else {
+                    startDateInput.removeAttribute('max');
+                }
+            });
+
+            if (startDateInput.value) {
+                endDateInput.setAttribute('min', startDateInput.value);
+            }
+            if (endDateInput.value) {
+                startDateInput.setAttribute('max', endDateInput.value);
+            }
+        }
+    });
+</script>
+{% endblock %}
